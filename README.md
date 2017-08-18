@@ -1,1 +1,1 @@
-# docker
+Docker bootstrap script
