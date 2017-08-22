@@ -1,4 +1,4 @@
-This is the docker host bootstrap script, which does the following:
+This is the docker host bootstrap script, it does the following:
 
 1. Configures a docker virtual network
 2. Queries Route53 A records and corresponding ECR repository names
