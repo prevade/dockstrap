@@ -1,4 +1,4 @@
-# bootstrap.py
+# dockstrap.py
 
 This is the docker host bootstrap script, it does the following:
 
