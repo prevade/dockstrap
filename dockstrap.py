@@ -38,5 +38,5 @@ for resourcerecordsets in sorted(r53_resourcerecordsets['ResourceRecordSets']):
                 # Pull image and initialize container with corresponding IP when FQDN and repository name match
                 if fqdn == repositories['repositoryName']:
                         os.system("docker pull %s.dkr.ecr.us-east-1.amazonaws.com/%s" % (ecr_registryid, fqdn))
-                        os.system("docker run -dit --ip %s --network %s --hostname %s --name %s %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn))
+                        os.system("docker run -dit --restart always --ip %s --network %s --hostname %s --name %s %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn))
                         break
