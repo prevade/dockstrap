@@ -2,11 +2,20 @@
 
 import boto3
 import os
+import requests
 import sys
 
-# Route53 and ECR client objects
+# Route53, ECR, and EC2 client objects
 r53_client = boto3.client('route53')
 ecr_client = boto3.client('ecr')
+ec2_client = boto3.client('ec2')
+
+# Disable source and destination checking
+response = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
+
+instance_id = response.text
+
+ec2_client.modify_instance_attribute(InstanceId=instance_id, SourceDestCheck={'Value': False})
 
 # Route53 configuration paramters
 r53_hostedzoneid = 'Z3SDCG6L1NXBOI'
@@ -38,5 +47,5 @@ for resourcerecordsets in sorted(r53_resourcerecordsets['ResourceRecordSets']):
                 # Pull image and initialize container with corresponding IP when FQDN and repository name match
                 if fqdn == repositories['repositoryName']:
                         os.system("docker pull %s.dkr.ecr.us-east-1.amazonaws.com/%s" % (ecr_registryid, fqdn))
-                        os.system("docker run -dit --restart always --ip %s --network %s --hostname %s --name %s %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn))
+                        os.system("docker run -dit --ip %s --network %s --hostname %s --name %s %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn))
                         break
