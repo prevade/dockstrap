@@ -2,20 +2,11 @@
 
 import boto3
 import os
-import requests
 import sys
 
 # Route53, ECR, and EC2 client objects
 r53_client = boto3.client('route53')
 ecr_client = boto3.client('ecr')
-ec2_client = boto3.client('ec2')
-
-# Disable source and destination checking
-response = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
-
-instance_id = response.text
-
-ec2_client.modify_instance_attribute(InstanceId=instance_id, SourceDestCheck={'Value': False})
 
 # Route53 configuration paramters
 r53_hostedzoneid = 'Z3SDCG6L1NXBOI'
