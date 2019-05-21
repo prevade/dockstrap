@@ -3,6 +3,7 @@
 import boto3
 import os
 import sys
+import time
 
 # Route53, ECR, and EC2 client objects
 r53_client = boto3.client('route53')
@@ -38,5 +39,13 @@ for resourcerecordsets in sorted(r53_resourcerecordsets['ResourceRecordSets']):
                 # Pull image and initialize container with corresponding IP when FQDN and repository name match
                 if fqdn == repositories['repositoryName']:
                         os.system("docker pull %s.dkr.ecr.us-east-1.amazonaws.com/%s" % (ecr_registryid, fqdn))
-                        os.system("docker run -dit --restart always --ip %s --network %s --hostname %s --name %s %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn))
+			if fqdn != "splunk.prevade.lab":
+	                        os.system("docker run -dit --restart always --ip %s --network %s --hostname %s --name %s %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn))
+			elif fqdn == "splunk.prevade.lab":
+				os.system("docker run -dit --restart always --ip %s --network %s --hostname %s --name %s -e SPLUNK_START_ARGS=--accept-license -e 'SPLUNK_PASSWORD=changeme' %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn)) 
+				time.sleep(30)			
+				os.system("docker exec -u root %s /bin/mkdir -p /opt/splunk/etc/deployment-apps/_server_app_Prevade/local" % (fqdn))
+				os.system("docker cp inputs.conf %s:/opt/splunk/etc/deployment-apps/_server_app_Prevade/local" % (fqdn))
+				os.system("docker cp serverclass.conf %s:/opt/splunk/etc/system/local" % (fqdn))
+				os.system("docker exec -u root %s /bin/chown -R splunk:splunk /opt/splunk" % (fqdn))
                         break
