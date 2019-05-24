@@ -1,4 +1,4 @@
-#!/usr/bin/python
+!/usr/bin/python
 
 import boto3
 import os
@@ -38,9 +38,16 @@ for resourcerecordsets in sorted(r53_resourcerecordsets['ResourceRecordSets']):
 
                 # Pull image and initialize container with corresponding IP when FQDN and repository name match
                 if fqdn == repositories['repositoryName']:
-                        os.system("docker pull %s.dkr.ecr.us-east-1.amazonaws.com/%s" % (ecr_registryid, fqdn))
-			if fqdn != "splunk.prevade.lab":
-	                        os.system("docker run -dit --cap-add SYSLOG --restart always --ip %s --network %s --hostname %s --name %s %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn))
-			elif fqdn == "splunk.prevade.lab":
-				os.system("docker run -dit --cap-add SYSLOG --restart always --ip %s --network %s --hostname %s --name %s -e SPLUNK_START_ARGS=--accept-license -e 'SPLUNK_PASSWORD=changeme' %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn)) 
+
+                        if "splunk.prevade.lab" in fqdn:
+                                os.system("docker run -dit --cap-add SYSLOG --restart always --ip %s --network %s --hostname %s --name %s -e SPLUNK_START_ARGS=--accept-license -e SPLUNK_PASSWORD=changeme splunk/splunk:latest" % (docker_address, docker_network, fqdn, fqdn))
+                                time.sleep(30)
+                                os.system("docker exec -u root splunk.prevade.lab /bin/mkdir -p /opt/splunk/etc/deployment-apps/_server_app_Prevade/local")
+                                os.system("docker cp app.conf splunk.prevade.lab:/opt/splunk/etc/deployment-apps/_server_app_Prevade/local")
+                                os.system("docker cp inputs.conf splunk.prevade.lab:/opt/splunk/etc/deployment-apps/_server_app_Prevade/local")
+                                os.system("docker cp serverclass.conf splunk.prevade.lab:/opt/splunk/etc/system/local")
+                                os.system("docker exec -u root splunk.prevade.lab /bin/chown -R splunk:splunk /opt/splunk")
+                        else:
+                                os.system("docker pull %s.dkr.ecr.us-east-1.amazonaws.com/%s" % (ecr_registryid, fqdn))
+                                os.system("docker run -dit --cap-add SYSLOG --restart always --ip %s --network %s --hostname %s --name %s %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn))
                         break
