@@ -47,6 +47,7 @@ for resourcerecordsets in sorted(r53_resourcerecordsets['ResourceRecordSets']):
                                 os.system("docker cp inputs.conf splunk.prevade.lab:/opt/splunk/etc/deployment-apps/_server_app_Prevade/local")
                                 os.system("docker cp serverclass.conf splunk.prevade.lab:/opt/splunk/etc/system/local")
                                 os.system("docker exec -u root splunk.prevade.lab /bin/chown -R splunk:splunk /opt/splunk")
+                                os.system("docker exec -u root splunk.prevade.lab /opt/splunk/bin/splunk restart")
                         else:
                                 os.system("docker pull %s.dkr.ecr.us-east-1.amazonaws.com/%s" % (ecr_registryid, fqdn))
                                 os.system("docker run -dit --cap-add SYSLOG --restart always --ip %s --network %s --hostname %s --name %s %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn))
