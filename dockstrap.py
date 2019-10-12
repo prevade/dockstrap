@@ -3,7 +3,6 @@
 import boto3
 import os
 import sys
-import time
 
 # Route53, ECR, and EC2 client objects
 r53_client = boto3.client('route53')
@@ -38,17 +37,6 @@ for resourcerecordsets in sorted(r53_resourcerecordsets['ResourceRecordSets']):
 
                 # Pull image and initialize container with corresponding IP when FQDN and repository name match
                 if fqdn == repositories['repositoryName']:
-
-                        if "splunk.prevade.lab" in fqdn:
-                                os.system("docker run -dit --cap-add SYSLOG --restart always --ip %s --network %s --hostname %s --name %s -e SPLUNK_START_ARGS=--accept-license -e SPLUNK_PASSWORD=changeme splunk/splunk:latest" % (docker_address, docker_network, fqdn, fqdn))
-                                time.sleep(60)
-                                os.system("docker exec -u root splunk.prevade.lab /bin/mkdir -p /opt/splunk/etc/deployment-apps/_server_app_Prevade/local")
-                                os.system("docker cp app.conf splunk.prevade.lab:/opt/splunk/etc/deployment-apps/_server_app_Prevade/local")
-                                os.system("docker cp inputs.conf splunk.prevade.lab:/opt/splunk/etc/deployment-apps/_server_app_Prevade/local")
-                                os.system("docker cp serverclass.conf splunk.prevade.lab:/opt/splunk/etc/system/local")
-                                os.system("docker exec -u root splunk.prevade.lab /bin/chown -R splunk:splunk /opt/splunk")
-                                os.system("docker exec -u root splunk.prevade.lab /opt/splunk/bin/splunk restart")
-                        else:
-                                os.system("docker pull %s.dkr.ecr.us-east-1.amazonaws.com/%s" % (ecr_registryid, fqdn))
-                                os.system("docker run -dit --cap-add SYSLOG --restart always --ip %s --network %s --hostname %s --name %s %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn))
+                        os.system("docker pull %s.dkr.ecr.us-east-1.amazonaws.com/%s" % (ecr_registryid, fqdn))
+                        os.system("docker run -dit --restart always --ip %s --network %s --hostname %s --name %s %s%s" % (docker_address, docker_network, fqdn, fqdn, ecr_uri, fqdn))
                         break
