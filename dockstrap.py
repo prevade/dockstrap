@@ -30,8 +30,8 @@ ecr_reg = ecr_client.describe_repositories(registryId=ecr_registryid)
 os.system("docker network create --subnet %s %s" % (docker_subnet,docker_network))
 
 # Map ECR repository name to corresponding Route53 FQDN A record
-for resourcerecordsets in sorted(r53_resourcerecordsets['ResourceRecordSets']):
-        for repositories in sorted(ecr_reg['repositories']):
+for resourcerecordsets in r53_resourcerecordsets['ResourceRecordSets']:
+        for repositories in ecr_reg['repositories']:
                 fqdn = str(resourcerecordsets['Name'])[:-1]
                 docker_address = str(resourcerecordsets['ResourceRecords'][0]['Value'])
 
